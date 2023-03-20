@@ -1,9 +1,102 @@
-# Issue H-1: User can game protection via renewal to get free insurance 
+# Issue H-1: The renewal grace period gives users insurance for no premium 
+
+Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/308 
+
+## Found by 
+0x52, jkoppel, monrel, libratus
+
+## Summary
+
+When a protection position is renewed, the contract checks that the expired timestamp is within the grace period of the current timestamp. The issue is that when it is renewed, it starts insurance at block.timestamp rather than the expiration of the previous protection. The result is that the grace period is effectively free insurance for the user.
+
+## Vulnerability Detail
+
+https://github.com/sherlock-audit/2023-02-carapace/blob/main/contracts/libraries/ProtectionPoolHelper.sol#L390-L397
+
+When checking if a position can be renewed it checks the expiration of the previous protection to confirm that it is being renewed within the grace period. 
+
+https://github.com/sherlock-audit/2023-02-carapace/blob/main/contracts/core/pool/ProtectionPool.sol#L181-L194
+
+After checking if the protection can be removed it starts the insurance at block.timestamp. The result is that the grace period doesn't collect any premium for it's duration. To abuse this the user would keep renewing at the end of the grace period for the shortest amount of time so that they would get the most amount of insurance for free.
+
+One might argue that the buyer didn't have insurance during this time but protection can be renewed at any time during the grace period and late payments are very easy to see coming (i.e. if the payment is due in 30 days and it's currently day 29). The result is that even though *technically* there isn't insurance the user is still basically insured because they would always be able to renew before a default.
+
+## Impact
+
+Renewal grace period can be abused to get free insurance
+
+## Code Snippet
+
+https://github.com/sherlock-audit/2023-02-carapace/blob/main/contracts/core/pool/ProtectionPool.sol#L176-L195
+
+## Tool used
+
+ChatGPT
+
+## Recommendation
+
+When renewing protection, the protection should renew from the end of the expired protection not block.timestamp.
+
+## Discussion
+
+**clems4ev3r**
+
+looks like a duplicate of #179
+
+**vnadoda**
+
+@clems4ev3r actually this is a duplicate of #190 
+
+**clems4ev3r**
+
+@vnadoda agreed, as per my comment on #190:
+#190 #308 and #179 are duplicates
+
+**IAm0x52**
+
+Escalate for 50 USDC
+
+Given the yield of the sellers is directly harmed by this and there are no prerequisites for this to happen, I believe that this should be high risk. I would like to point out that #179 and #190 already categorize this as high.
+
+**sherlock-admin**
+
+ > Escalate for 50 USDC
+> 
+> Given the yield of the sellers is directly harmed by this and there are no prerequisites for this to happen, I believe that this should be high risk. I would like to point out that #179 and #190 already categorize this as high.
+
+You've created a valid escalation for 50 USDC!
+
+To remove the escalation from consideration: Delete your comment.
+To change the amount you've staked on this escalation: Edit your comment **(do not create a new comment)**.
+
+You may delete or edit your escalation comment anytime before the 48-hour escalation window closes. After that, the escalation becomes final.
+
+**hrishibhat**
+
+Escalation accepted
+
+Considering this issue as high
+
+
+**sherlock-admin**
+
+> Escalation accepted
+> 
+> Considering this issue as high
+> 
+
+This issue's escalations have been accepted!
+
+Contestants' payouts and scores will be updated according to the changes made on this issue.
+
+
+
+# Issue H-2: User can game protection via renewal to get free insurance 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/293 
 
 ## Found by 
-jkoppel, 0x52, 0Kage, minhtrng, libratus, rvierdiiev, monrel, KingNFT
+minhtrng, KingNFT, jkoppel, monrel, rvierdiiev, libratus, 0Kage, 0x52
 
 ## Summary
 
@@ -68,12 +161,12 @@ Cc @hrishibhat
 
 
 
-# Issue H-2: Protection sellers can bypass withdrawal delay mechanism and avoid losing funds when loans are defaulted by creating withdrawal request in each cycle 
+# Issue H-3: Protection sellers can bypass withdrawal delay mechanism and avoid losing funds when loans are defaulted by creating withdrawal request in each cycle 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/292 
 
 ## Found by 
-ctf\_sec, Jeiwan, peanuts, mahdikarimi, HonorLt, 0Kage, csanuragjain, ktg, chaduke, jprod15, mert\_eren, rvierdiiev, KingNFT, Allarious, immeas, Ruhum, jkoppel, carrot, XKET, Bauer, ck, bin2chen, ast3ros, 0x52, unforgiven, libratus, monrel, clems4ever
+carrot, monrel, csanuragjain, ast3ros, mahdikarimi, Jeiwan, KingNFT, immeas, rvierdiiev, ctf\_sec, 0Kage, clems4ever, jprod15, peanuts, mert\_eren, bin2chen, libratus, Ruhum, Bauer, unforgiven, Allarious, XKET, 0x52, chaduke, HonorLt
 
 ## Summary
 To prevent protection sellers from withdrawing fund immediately when protected lending pools are defaults, there is withdrawal delay mechanism, but it's possible to bypass it by creating withdraw request in each cycle by doing so user can withdraw in each cycle's open state. there is no penalty for users when they do this or there is no check to avoid this.
@@ -133,7 +226,7 @@ Manual Review
 ## Recommendation
 To avoid this code should keep track of user balance that is not in withdraw delay and user balance that are requested for withdraw. and to prevent users from requesting withdrawing and not doing it protocol should have some penalties for withdrawals, for example the waiting withdraw balance shouldn't get reward in waiting duration.
 
-# Issue H-3: Lending pool state transition will be broken when pool is expired in late state 
+# Issue H-4: Lending pool state transition will be broken when pool is expired in late state 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/230 
 
@@ -239,7 +332,7 @@ These are tricky cases, think about transition for lending pool in such cases.
 
 
 
-# Issue H-4: Existing buyer who has been regularly renewing protection will be denied renewal even when she is well within the renewal grace period 
+# Issue H-5: Existing buyer who has been regularly renewing protection will be denied renewal even when she is well within the renewal grace period 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/174 
 
@@ -348,14 +441,33 @@ Recommend using `verifyLendingPoolIsActiveForRenewal` function in renewal flow a
 
 @vnadoda yes this is a valid issue
 
+**Jeiwan**
+
+@vnadoda Could you please clarify why this is a valid issue? And I'd appreciate if you share how you fixed it.
+
+In my view, the recommended mitigation introduces a different vulnerability: allowing to renew protections in `LateWithinGracePeriod` and `Late` states gives buyers an advantage  and allows to time late positions because positions in these states have a higher chance of a default.  This can be exploited as follows:
+1. Buyers only buy protections with the minimal duration.
+1. Expired protections are not renewed until positions get into the `LateWithinGracePeriod` or `Late` state.
+1. Multiple options here:
+a) If positions don't get into the `LateWithinGracePeriod` state before the renewal window has expired, buyers renew positions. This allows them to not pay for the duration of the renewal window.
+b) When positions are in the `LateWithinGracePeriod` state and the grace period is close to running out, buyers renew their protections so that they cover the moment when the positions default.
+c) When positions are in the `Late` state, buyers renew their protections to cover the moment when the positions default.
+
+This allows buyers to minimize the cost of protections while having an almost guaranteed way to get a protection if a position defaults.
+
+**vnadoda**
+
+@Jeiwan @clems4ev3r @hrishibhat Once protection is expired, buyers will have a certain time limit within which they have to renew (7-10 days). So buyers can't wait for a long time. Generally payment period for loans is 30 days.
+Essentially buyers have to continuously renew their protections to get the coverage.
 
 
-# Issue H-5: Protection seller will lose unlocked capital if it fails to claim during more than one period 
+
+# Issue H-6: Protection seller will lose unlocked capital if it fails to claim during more than one period 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/142 
 
 ## Found by 
-Tricko, jkoppel, MalfurionWhitehat, XKET, Koolex, bin2chen, VAD37, dec3ntraliz3d, immeas
+jkoppel, immeas, XKET, MalfurionWhitehat, Tricko, dec3ntraliz3d, Koolex, bin2chen, VAD37
 
 ## Summary
 
@@ -391,12 +503,20 @@ Manual Review
 
 Increment `_claimableUnlockedCapital` [for all](https://github.com/sherlock-audit/2023-02-carapace/blob/main/contracts/core/DefaultStateManager.sol#L502-L505) locked capital instances.
 
-# Issue H-6: Sybil on withdrawal requests can allow leverage factor manipulation with flashloans 
+## Discussion
+
+**vnadoda**
+
+@clems4ev3r PR for the fix is: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/62
+
+
+
+# Issue H-7: Sybil on withdrawal requests can allow leverage factor manipulation with flashloans 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/116 
 
 ## Found by 
-mahdikarimi, clems4ever
+ck, libratus, mahdikarimi, clems4ever
 
 ## Summary
 To be able to withdraw, a user has to request a withdraw first. The only requirement to be able to request a withdraw is to have a balance of SToken upon requesting. By requesting withdraws with the same tokens but from different addresses, a malicious user can create the option to withdraw during one cycle more than what is deposited in the protocol. They cannot drain the protocol since they only have a limited amount of SToken to burn (required to call `withdraw()`), but they acquire the ability to deposit new funds and withdraw them in the same block, thus manipulating premium prices.
@@ -429,12 +549,12 @@ Manual Review
 ## Recommendation
 Freeze STokens for a depositor once they requested a withdrawal.
 
-# Issue H-7: Protection buyer may buy multiple protections for same goldfinch NFT 
+# Issue H-8: Protection buyer may buy multiple protections for same goldfinch NFT 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/112 
 
 ## Found by 
-ctf\_sec, jkoppel, 0x52, \_\_141345\_\_, 0Kage, modern\_Alchemist\_00, minhtrng, libratus, c7e7eff, Allarious, bin2chen, clems4ever, chaduke, immeas
+minhtrng, c7e7eff, Allarious, jkoppel, immeas, bin2chen, libratus, ctf\_sec, \_\_141345\_\_, modern\_Alchemist\_00, 0Kage, clems4ever, 0x52, chaduke
 
 ## Summary
 The Carapace protocol checks that a protection buyer does not buy a protection for an 
@@ -474,14 +594,18 @@ This double counting of locked capital issue seems a legit concern.
 Now we are considering fixing this with other audit issues.
 
 
+**vnadoda**
+
+@clems4ev3r PR for this fix: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/59
 
 
-# Issue H-8: Too many active protections can cause the ProtectionPool reach the block gas limit 
+
+# Issue H-9: Too many active protections can cause the ProtectionPool reach the block gas limit 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/63 
 
 ## Found by 
-ctf\_sec, peanuts, SPYBOY, \_\_141345\_\_, 0Kage, chaduke, rvierdiiev, KingNFT, yixxas, Ruhum, jkoppel, weeeh\_, Bauer, modern\_Alchemist\_00, bin2chen, Koolex, Tricko, ast3ros, MalfurionWhitehat, 0x52, unforgiven, minhtrng, libratus, clems4ever
+ast3ros, KingNFT, rvierdiiev, MalfurionWhitehat, Tricko, ctf\_sec, 0Kage, yixxas, clems4ever, jkoppel, peanuts, bin2chen, libratus, \_\_141345\_\_, Ruhum, Bauer, SPYBOY, minhtrng, unforgiven, Koolex, modern\_Alchemist\_00, 0x52, chaduke
 
 ## Summary
 There are two instances where the ProtectionPool contract loops over an unbounded array. These can cause the transaction to succeed the block gas limit causing the transaction to revert, see https://swcregistry.io/docs/SWC-128.
@@ -638,7 +762,7 @@ The function `lockCapital` deals with one lending pool at a time, so practically
 
 
 
-# Issue H-9: Missing validation of snapshotId makes it possible for the investor to claim unlocked capitals from the same snapshot multiple times 
+# Issue H-10: Missing validation of snapshotId makes it possible for the investor to claim unlocked capitals from the same snapshot multiple times 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/60 
 
@@ -814,7 +938,7 @@ I will add this to the fix list
 
 
 
-# Issue H-10: Malicious seller forced break lockCapital() 
+# Issue H-11: Malicious seller forced break lockCapital() 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/31 
 
@@ -946,12 +1070,12 @@ Manual Review
 
 try catch for _poolTokens.ownerOf() If revert, it is assumed that the lender is not the owner
 
-# Issue H-11: Sandwich attack to accruePremiumAndExpireProtections() 
+# Issue H-12: Sandwich attack to accruePremiumAndExpireProtections() 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/26 
 
 ## Found by 
-immeas, monrel, chaduke, 0Kage
+jkoppel, monrel, immeas, libratus, 0Kage, chaduke
 
 ## Summary
 ``accruePremiumAndExpireProtections()`` will increase ``totalSTokenUnderlying``, and thus increase the exchange rate of the ``ProtectionPool``. A malicious user can launch a sandwich attack and profit. This violates the ``Fair Distribution`` principle of the protocol: 
@@ -1049,68 +1173,12 @@ Manual Review
 
 
 
-# Issue M-1: The renewal grace period gives users insurance for no premium 
-
-Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/308 
-
-## Found by 
-0x52, monrel, libratus, jkoppel
-
-## Summary
-
-When a protection position is renewed, the contract checks that the expired timestamp is within the grace period of the current timestamp. The issue is that when it is renewed, it starts insurance at block.timestamp rather than the expiration of the previous protection. The result is that the grace period is effectively free insurance for the user.
-
-## Vulnerability Detail
-
-https://github.com/sherlock-audit/2023-02-carapace/blob/main/contracts/libraries/ProtectionPoolHelper.sol#L390-L397
-
-When checking if a position can be renewed it checks the expiration of the previous protection to confirm that it is being renewed within the grace period. 
-
-https://github.com/sherlock-audit/2023-02-carapace/blob/main/contracts/core/pool/ProtectionPool.sol#L181-L194
-
-After checking if the protection can be removed it starts the insurance at block.timestamp. The result is that the grace period doesn't collect any premium for it's duration. To abuse this the user would keep renewing at the end of the grace period for the shortest amount of time so that they would get the most amount of insurance for free.
-
-One might argue that the buyer didn't have insurance during this time but protection can be renewed at any time during the grace period and late payments are very easy to see coming (i.e. if the payment is due in 30 days and it's currently day 29). The result is that even though *technically* there isn't insurance the user is still basically insured because they would always be able to renew before a default.
-
-## Impact
-
-Renewal grace period can be abused to get free insurance
-
-## Code Snippet
-
-https://github.com/sherlock-audit/2023-02-carapace/blob/main/contracts/core/pool/ProtectionPool.sol#L176-L195
-
-## Tool used
-
-ChatGPT
-
-## Recommendation
-
-When renewing protection, the protection should renew from the end of the expired protection not block.timestamp.
-
-## Discussion
-
-**clems4ev3r**
-
-looks like a duplicate of #179
-
-**vnadoda**
-
-@clems4ev3r actually this is a duplicate of #190 
-
-**clems4ev3r**
-
-@vnadoda agreed, as per my comment on #190:
-#190 #308 and #179 are duplicates
-
-
-
-# Issue M-2: function lockCapital() doesn't filter the expired protections first and code may lock more funds than required and expired defaulted protections may funded 
+# Issue M-1: function lockCapital() doesn't filter the expired protections first and code may lock more funds than required and expired defaulted protections may funded 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/305 
 
 ## Found by 
-Web3SecurityDAO, XKET, unforgiven, \_\_141345\_\_, rvierdiiev
+unforgiven, XKET, rvierdiiev, \_\_141345\_\_, Web3SecurityDAO
 
 ## Summary
 when a lending loan defaults, then function `lockCapital()` get called in the ProtectionPool to lock required funds for the protections bought for that lending pool, but code doesn't filter the expired protections first and they may be expired protection in the active protection array that are not excluded and this would cause code to lock more fund and pay fund for expired defaulted protections and protection sellers would lose more funds.
@@ -1211,12 +1279,12 @@ call `_accruePremiumAndExpireProtections()` for the defaulted pool to filter out
 
 
 
-# Issue M-3: Protection can be bought in late pools, allowing buyers to pay minimal premium and increase the chance of a compensation 
+# Issue M-2: Protection can be bought in late pools, allowing buyers to pay minimal premium and increase the chance of a compensation 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/252 
 
 ## Found by 
-ctf\_sec, Jeiwan, ast3ros, mahdikarimi, Kumpa, 0Kage, libratus, monrel, Allarious
+mahdikarimi, Jeiwan, Allarious, monrel, rvierdiiev, libratus, ctf\_sec, ast3ros, 0Kage, Kumpa
 
 ## Summary
 A buyer can buy a protection for a pool that's already late on a payment. The buyer can pay the minimal premium and get a higher chance of getting a compensation. Protection sellers may bear higher losses due to reduced premium amounts and the increased chance of protection payments.
@@ -1246,6 +1314,124 @@ Protection buyers can increase their chances of getting a compensation, while bu
 Manual Review
 ## Recommendation
 In `ProtectionPoolHelper._verifyLendingPoolIsActive`, consider calling `DefaultStateManager._assessState` to update the status of the pool for which a protection is bought.
+
+# Issue M-3: If unlocked capital in pool falls below minRequiredCapital, then protection can be bought for minimum premium 
+
+Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/211 
+
+## Found by 
+jkoppel
+
+## Summary
+
+If the unlocked capital in a pool falls below the minRequiredCapital, then protection can be bought for minimum premium
+
+## Vulnerability Detail
+
+In PremiumCalculator.calculatePremium, we see that if the risk factor "cannot  be calculated," it uses the minimum premium.
+
+```solidity
+    if (
+      RiskFactorCalculator.canCalculateRiskFactor(
+        _totalCapital,
+        _leverageRatio,
+        _poolParameters.leverageRatioFloor,
+        _poolParameters.leverageRatioCeiling,
+        _poolParameters.minRequiredCapital
+      )
+    ) {
+      ...
+    } else {
+      /// This means that the risk factor cannot be calculated because of either
+      /// min capital not met or leverage ratio out of range.
+      /// Hence, the premium is the minimum premium
+      _isMinPremium = true;
+    }
+```
+
+In RiskFactor.canCalculateRiskFactor, we see there are three conditions when this is so:
+
+```solidity
+  function canCalculateRiskFactor(
+    uint256 _totalCapital,
+    uint256 _leverageRatio,
+    uint256 _leverageRatioFloor,
+    uint256 _leverageRatioCeiling,
+    uint256 _minRequiredCapital
+  ) external pure returns (bool _canCalculate) {
+    if (
+      _totalCapital < _minRequiredCapital ||
+      _leverageRatio < _leverageRatioFloor ||
+      _leverageRatio > _leverageRatioCeiling
+    ) {
+      _canCalculate = false;
+    } else {
+      _canCalculate = true;
+    }
+  }
+}
+```
+
+If the leverage ratio is above the ceiling, then protection should be very cheap, and it is correct to use the minimum premium. If the leverage ratio is above the floor, then protection cannot be purchased.
+
+However, we see that the minimum premium is also used if _totalCapital is below _minRequiredCapital. In this case, protection should be very expensive, but it will instead be very cheap.
+
+Total capital can fall this low in a couple ways. One way is if most sellers withdraw their funds and most protection positions expire. Then the pool can have a very small amount of capital while still having a leverage ratio within the window.  Another is if most of the capital is locked. In that case, the protection likely cannot be bought because the leverage ratio is likely to be too low. However, when capital is locked, the corresponding protection should not count against the leverage ratio, as that can prevent buyers from buying protection even when the pool is very well capitalized ( see https://github.com/sherlock-audit/2023-02-carapace-jkoppel/issues/11 ). If that issue is fixed, then this issue can appear when capital is locked.
+
+## Impact
+
+Buyers can get very cheap protection at a time when it should be expensive.
+
+## Code Snippet
+
+https://github.com/sherlock-audit/2023-02-carapace/blob/main/contracts/core/PremiumCalculator.sol#L63
+
+## Tool used
+
+Manual Review
+
+## Recommendation
+
+Prohibit protection purchases when capital falls below the minimum required capital
+
+## Discussion
+
+**jkoppel**
+
+Escalate for 26 USDC
+
+This is not a duplicate of #325. That issue only talks about when the leverage ratio falls below the floor. As @clems4ev3r  pointed out, that case is correctly handled: protection cannot be purchased at all.
+
+This report talks about when the leverage ratio is within range but most funds are either withdrawn or locked. Then protection should  be very expensive but is instead very cheap. And this will not revert.
+
+**sherlock-admin**
+
+ > Escalate for 26 USDC
+> 
+> This is not a duplicate of #325. That issue only talks about when the leverage ratio falls below the floor. As @clems4ev3r  pointed out, that case is correctly handled: protection cannot be purchased at all.
+> 
+> This report talks about when the leverage ratio is within range but most funds are either withdrawn or locked. Then protection should  be very expensive but is instead very cheap. And this will not revert.
+
+You've created a valid escalation for 26 USDC!
+
+To remove the escalation from consideration: Delete your comment.
+To change the amount you've staked on this escalation: Edit your comment **(do not create a new comment)**.
+
+You may delete or edit your escalation comment anytime before the 48-hour escalation window closes. After that, the escalation becomes final.
+
+**Evert0x**
+
+Escalation accepted
+
+**sherlock-admin**
+
+> Escalation accepted
+
+This issue's escalations have been accepted!
+
+Contestants' payouts and scores will be updated according to the changes made on this issue.
+
+
 
 # Issue M-4: Protection too expensive when some capital is locked 
 
@@ -1296,7 +1482,188 @@ Do not count protections which are locking up capital when computing the leverag
 
 
 
-# Issue M-5: secondary markets are problematic with how `lockCapital` works 
+# Issue M-5: If a `lendingPool` is added to the network while in `late` state, can be defaulted instantly 
+
+Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/151 
+
+## Found by 
+Allarious
+
+## Summary
+If a lending pool is added to a protection pool, the `defaultStateManager` sets the `currentState` to late without setting the late timestamp. This can enable anyone in the network to be able to call the `_assessState` once more and mark the pool as default.
+
+## Vulnerability Detail
+`defaultStateManager` user `_assessState` function to transfer between states. However, in case an underlying pool is called by `_assessState` for the first time when it is added to the protocol. The `_assessState` function sets the `currentState` to `late` without updating the `lateTimestamp` which will remain zero. The attacker can exploit this to move the pool to the default state where it locks the lending pool and renders it unusable.
+
+While it is checked that when pools are added to the `ReferenceLendingPool` inside `_addReferenceLendingPool` that the pools should be in `Active` state, if in the time between the addition of a pool and the first time call of `_assessState` the pool goes from `Active` to `Late`, this attack can be performed by the attacker.
+
+https://github.com/sherlock-audit/2023-02-carapace/blob/main/contracts/core/DefaultStateManager.sol#L370-L375
+
+## Impact
+An attacker can render an underlying lending pool unusable.
+
+## Code Snippet
+
+## Tool used
+
+Manual Review
+
+## Recommendation
+The `_assessState` should handle the initial setting of the state seperately.
+
+## Discussion
+
+**clems4ev3r**
+
+@vnadoda a lending pool cannot be added without being in the active state per this check:
+https://github.com/sherlock-audit/2023-02-carapace/blob/main/contracts/core/pool/ReferenceLendingPools.sol#L284
+this sounds invalid 
+
+**vnadoda**
+
+@clems4ev3r  A reporter has mentioned that, but his main concern is the following:
+"While it is checked that when pools are added to the ReferenceLendingPool inside _addReferenceLendingPool that the pools should be in Active state, **if in the time between the addition of a pool and the first time call of _assessState the pool goes from Active to Late, this attack can be performed by the attacker.**"
+
+So I think this concern is valid, but low priority because the probability of this happening is very low.
+
+**vnadoda**
+
+@clems4ev3r We are planning to call `DefaultStateManager.assessState` just after adding the lending pool in op script. 
+But maybe we should have addLendingPool in DefaultStateManager for onlyOwner, which should call RLP.add and then asset state as well? 
+In any case, this is a low-priority issue, do you agree?
+
+**clems4ev3r**
+
+@vnadoda as discussed on call, given the steps taken during op script, and low probability of the issue this could be lowered in severity to low
+
+**hrishibhat**
+
+Considering this issue as low based on the comments above. 
+
+**Allarious**
+
+Escalate for 75 USDC
+
+The issue is pointing out that while pools get checked to be active when they are being added to the pool, they are not getting checked first time that they are undergoing the `assessState` call. This is a simple issue in nature which is incorrectly handled by the protocol that can lead to an incorrect lending pool state. Relying so heavily on `assessState` running at the same time each day can not be a good design choice and we see here that for every hour of delay, the pool is risking the default of underlying pools. Therefore, this should definitely be considered for at least medium severity. While the issue is explaining the simple attack well enough, here is a more extensive version of explanation.
+
+This issue arises from two valid points that happen in the system:
+
+* `assessState` gets called daily.
+* The `defaultStateManager` does not handle `Not Supported -> Late`.
+
+The protocol expects `addProtocol` and `assessState` to happen together, which might make sense from the developer point of view, but opens up a serious attack vector from security point of view when protocol is running `assessState` once a day.
+
+Also, naming could be changed to "If a lendingPool is added to the network while **close to** late state, can be defaulted instantly". I agree that writing and the naming could be much better but the issue is pointing out a valid problem.
+
+## Step by Step
+(1) A pool in its active state gets added to the pool by calling `_addReferenceLendingPool`
+(2) Lets imagine the case where the daily `assessState` was just called
+(3) The `lendingPool` goes from `Active -> Late` before next `assessState`
+(4) In case where `assessState` is called the next day with any delay, the protocol will pass the grace period and enter the `Late` state. The protocol is not designed to handle this case, if the grace period was any smaller than one day, this issue could have caused much more damage.
+(5) When `assessState` is called, the `defaultStateManager` takes the system from `Not supported -> Late` without setting the `lateTimestamp`.
+(6) Any attacker in the system can call the `assessState` again to wrongfully default the pool
+
+## Justification of this issue being H/M
+* (Considerable Probability) The probability of the pool going from `Active -> Late` within two `assessStates` are very high, however, the protocol is heavily relying on the `assessState` being run at the same time everyday and can be extremely dangerous. If we consider a pool's payment period is 14 days, possibility of a added pool to be instantly defaulted is (number_of_delay_hours/24) * 1/14, where for 6 hours of delay in running `assessState`, puts one out of roughly 50 added pools in danger of default.
+* (No Permission Needed) Anyone in the network can trigger the default, and have time as far as the underlying pool is at `late` state
+* (No Fees) Attacker needs to only pay the gas fee in order to cause the pool to default
+* (Complete DoS) The defaulted pool is unusable and can not be removed from the `referenceLendingPools` and would be marked defaulted, effectively DoSing the buyers of the defaulted pool.
+* (Inevitability) Lets imagine you run the script between 12:00 pm and 01:00 pm each day and therefore you have around 15 minutes delay time on average in 90 days, you will have an overall of 22.5 hours overall delay and if we consider the probability uniform, the change of default of pools is (22.5/24) * 1/active_period_in_days which is very close to 1/active_period_in_days. if `active_period_in_days = 14` then you have one out of 14 default because of this.
+
+The issue is already showing sufficient data about the exploit, why it happens and how to stop it. Therefore, I think it should be labelled Medium or High.
+
+## Comments provided by LSW and Sponsor
+> @vnadoda a lending pool cannot be added without being in the active state per this check:
+https://github.com/sherlock-audit/2023-02-carapace/blob/main/contracts/core/pool/ReferenceLendingPools.sol#L284
+this sounds invalid
+
+This issue is talking about when the pool is assessed for the first time while in the `late` state. While I agree that the naming and writing could be better, it is still showing enough data if you read all of the issue carefully.
+
+> So I think this concern is valid, but low priority because the probability of this happening is very low.
+
+The probability is considerable, as shown above. It is not a good idea to be relying on a script running everyday without no pre-cautions, now that we can see even hours late can cause some pools to default. Handling such cases on-chain would happen easily by correctly implementing `Not Supported -> Late` in `defaultStateManager`, while it is not handled correctly, should be heavily considered by the team.
+
+> We are planning to call DefaultStateManager.assessState just after adding the lending pool in op script.
+
+If there is a need to handle this in a script/third contract, then it means there is a valid bug here. As stated in the initial scope of the audit, `assessState` gets called daily and `_addReferenceLendingPool` can be called anytime. I believe the issue's severity should be judged based on `assessState` running daily. However, if you want to use an external script/contract to handle this, you need to consider the points mentioned below.
+* Either you are using a third smart contract to call `_addReferenceLendingPool` and `assessState` atomically, which is the safest option.
+* Or you are using an off-chain script to send two transactions `_addReferenceLendingPool` and `assessState` together, where in this case, if the transactions are not included in the certain order of `_addReferenceLendingPool` first and `assessState` second, the `assessState` would be ineffective and attack is again valid.
+
+**sherlock-admin**
+
+ > Escalate for 75 USDC
+> 
+> The issue is pointing out that while pools get checked to be active when they are being added to the pool, they are not getting checked first time that they are undergoing the `assessState` call. This is a simple issue in nature which is incorrectly handled by the protocol that can lead to an incorrect lending pool state. Relying so heavily on `assessState` running at the same time each day can not be a good design choice and we see here that for every hour of delay, the pool is risking the default of underlying pools. Therefore, this should definitely be considered for at least medium severity. While the issue is explaining the simple attack well enough, here is a more extensive version of explanation.
+> 
+> This issue arises from two valid points that happen in the system:
+> 
+> * `assessState` gets called daily.
+> * The `defaultStateManager` does not handle `Not Supported -> Late`.
+> 
+> The protocol expects `addProtocol` and `assessState` to happen together, which might make sense from the developer point of view, but opens up a serious attack vector from security point of view when protocol is running `assessState` once a day.
+> 
+> Also, naming could be changed to "If a lendingPool is added to the network while **close to** late state, can be defaulted instantly". I agree that writing and the naming could be much better but the issue is pointing out a valid problem.
+> 
+> ## Step by Step
+> (1) A pool in its active state gets added to the pool by calling `_addReferenceLendingPool`
+> (2) Lets imagine the case where the daily `assessState` was just called
+> (3) The `lendingPool` goes from `Active -> Late` before next `assessState`
+> (4) In case where `assessState` is called the next day with any delay, the protocol will pass the grace period and enter the `Late` state. The protocol is not designed to handle this case, if the grace period was any smaller than one day, this issue could have caused much more damage.
+> (5) When `assessState` is called, the `defaultStateManager` takes the system from `Not supported -> Late` without setting the `lateTimestamp`.
+> (6) Any attacker in the system can call the `assessState` again to wrongfully default the pool
+> 
+> ## Justification of this issue being H/M
+> * (Considerable Probability) The probability of the pool going from `Active -> Late` within two `assessStates` are very high, however, the protocol is heavily relying on the `assessState` being run at the same time everyday and can be extremely dangerous. If we consider a pool's payment period is 14 days, possibility of a added pool to be instantly defaulted is (number_of_delay_hours/24) * 1/14, where for 6 hours of delay in running `assessState`, puts one out of roughly 50 added pools in danger of default.
+> * (No Permission Needed) Anyone in the network can trigger the default, and have time as far as the underlying pool is at `late` state
+> * (No Fees) Attacker needs to only pay the gas fee in order to cause the pool to default
+> * (Complete DoS) The defaulted pool is unusable and can not be removed from the `referenceLendingPools` and would be marked defaulted, effectively DoSing the buyers of the defaulted pool.
+> * (Inevitability) Lets imagine you run the script between 12:00 pm and 01:00 pm each day and therefore you have around 15 minutes delay time on average in 90 days, you will have an overall of 22.5 hours overall delay and if we consider the probability uniform, the change of default of pools is (22.5/24) * 1/active_period_in_days which is very close to 1/active_period_in_days. if `active_period_in_days = 14` then you have one out of 14 default because of this.
+> 
+> The issue is already showing sufficient data about the exploit, why it happens and how to stop it. Therefore, I think it should be labelled Medium or High.
+> 
+> ## Comments provided by LSW and Sponsor
+> > @vnadoda a lending pool cannot be added without being in the active state per this check:
+> https://github.com/sherlock-audit/2023-02-carapace/blob/main/contracts/core/pool/ReferenceLendingPools.sol#L284
+> this sounds invalid
+> 
+> This issue is talking about when the pool is assessed for the first time while in the `late` state. While I agree that the naming and writing could be better, it is still showing enough data if you read all of the issue carefully.
+> 
+> > So I think this concern is valid, but low priority because the probability of this happening is very low.
+> 
+> The probability is considerable, as shown above. It is not a good idea to be relying on a script running everyday without no pre-cautions, now that we can see even hours late can cause some pools to default. Handling such cases on-chain would happen easily by correctly implementing `Not Supported -> Late` in `defaultStateManager`, while it is not handled correctly, should be heavily considered by the team.
+> 
+> > We are planning to call DefaultStateManager.assessState just after adding the lending pool in op script.
+> 
+> If there is a need to handle this in a script/third contract, then it means there is a valid bug here. As stated in the initial scope of the audit, `assessState` gets called daily and `_addReferenceLendingPool` can be called anytime. I believe the issue's severity should be judged based on `assessState` running daily. However, if you want to use an external script/contract to handle this, you need to consider the points mentioned below.
+> * Either you are using a third smart contract to call `_addReferenceLendingPool` and `assessState` atomically, which is the safest option.
+> * Or you are using an off-chain script to send two transactions `_addReferenceLendingPool` and `assessState` together, where in this case, if the transactions are not included in the certain order of `_addReferenceLendingPool` first and `assessState` second, the `assessState` would be ineffective and attack is again valid.
+
+You've created a valid escalation for 75 USDC!
+
+To remove the escalation from consideration: Delete your comment.
+To change the amount you've staked on this escalation: Edit your comment **(do not create a new comment)**.
+
+You may delete or edit your escalation comment anytime before the 48-hour escalation window closes. After that, the escalation becomes final.
+
+**hrishibhat**
+
+Escalation accepted
+
+Based on internal discussions with the Team and the Lead Watson, the protocol calls for `assessstate` as soon as the lending pool is added, but this information was not available during the audit, there is a likely chance the issue could still happen, hence considering this a valid medium. 
+
+**sherlock-admin**
+
+> Escalation accepted
+> 
+> Based on internal discussions with the Team and the Lead Watson, the protocol calls for `assessstate` as soon as the lending pool is added, but this information was not available during the audit, there is a likely chance the issue could still happen, hence considering this a valid medium. 
+
+This issue's escalations have been accepted!
+
+Contestants' payouts and scores will be updated according to the changes made on this issue.
+
+
+
+# Issue M-6: secondary markets are problematic with how `lockCapital` works 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/147 
 
@@ -1356,7 +1723,7 @@ Manual Review
 ## Recommendation
 I recommend you make `assessState` only callable by a trusted user. This would remove the attack vector, since you must hold the tokens over a transaction. It would still be possible to use the [withdraw bug](https://github.com/sherlock-audit/2023-02-carapace-0ximmeas/issues/4), but if that is fixed this would remove the possibility to "flash-lock".
 
-# Issue M-6: Growing of totalSupply after successive lock/unlockCapital can freeze protection pools by uint overflow 
+# Issue M-7: Growing of totalSupply after successive lock/unlockCapital can freeze protection pools by uint overflow 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/118 
 
@@ -1423,12 +1790,12 @@ Agreed that was not clearly stated in the original report. And it technically sh
 
 
 
-# Issue M-7: Freezing of the protocol when totalSTokenUnderlying is zero but totalSupply is non-zero 
+# Issue M-8: Freezing of the protocol when totalSTokenUnderlying is zero but totalSupply is non-zero 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/117 
 
 ## Found by 
-Ruhum, jprod15, Web3SecurityDAO, Kumpa, Bauer, mert\_eren, clems4ever, chaduke
+jprod15, mert\_eren, Web3SecurityDAO, clems4ever, Ruhum, Bauer, chaduke, Kumpa
 
 ## Summary
 In some cases the protocol can contain zero funds while having a non zero totalSupply of STokens. In that case the protocol will not be able to accept any new deposits and any new protection buys, thus coming to a halt, unless all STokens are burned by their respective holders.
@@ -1466,7 +1833,7 @@ Keep a minimum amount of totalSTokenUnderlying in the contract in any case (can 
 
 
 
-# Issue M-8: Some protection buyers might not be able to renew their protections due to delayed expiration processing. 
+# Issue M-9: Some protection buyers might not be able to renew their protections due to delayed expiration processing. 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/27 
 
