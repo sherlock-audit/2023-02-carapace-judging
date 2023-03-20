@@ -3,7 +3,7 @@
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/308 
 
 ## Found by 
-0x52, jkoppel, monrel, libratus
+monrel, jkoppel, 0x52, libratus
 
 ## Summary
 
@@ -96,7 +96,7 @@ Contestants' payouts and scores will be updated according to the changes made on
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/293 
 
 ## Found by 
-minhtrng, KingNFT, jkoppel, monrel, rvierdiiev, libratus, 0Kage, 0x52
+libratus, monrel, minhtrng, rvierdiiev, jkoppel, 0Kage, 0x52, KingNFT
 
 ## Summary
 
@@ -166,7 +166,7 @@ Cc @hrishibhat
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/292 
 
 ## Found by 
-carrot, monrel, csanuragjain, ast3ros, mahdikarimi, Jeiwan, KingNFT, immeas, rvierdiiev, ctf\_sec, 0Kage, clems4ever, jprod15, peanuts, mert\_eren, bin2chen, libratus, Ruhum, Bauer, unforgiven, Allarious, XKET, 0x52, chaduke, HonorLt
+XKET, ctf\_sec, monrel, bin2chen, mahdikarimi, libratus, rvierdiiev, csanuragjain, chaduke, ast3ros, jprod15, peanuts, 0x52, clems4ever, Allarious, carrot, Bauer, HonorLt, 0Kage, mert\_eren, KingNFT, Jeiwan, Ruhum, unforgiven, immeas
 
 ## Summary
 To prevent protection sellers from withdrawing fund immediately when protected lending pools are defaults, there is withdrawal delay mechanism, but it's possible to bypass it by creating withdraw request in each cycle by doing so user can withdraw in each cycle's open state. there is no penalty for users when they do this or there is no check to avoid this.
@@ -231,7 +231,7 @@ To avoid this code should keep track of user balance that is not in withdraw del
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/230 
 
 ## Found by 
-rvierdiiev, Jeiwan
+Jeiwan, rvierdiiev
 
 ## Summary
 Lending pool state transition will be broken when pool is expired in late state
@@ -467,7 +467,7 @@ Essentially buyers have to continuously renew their protections to get the cover
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/142 
 
 ## Found by 
-jkoppel, immeas, XKET, MalfurionWhitehat, Tricko, dec3ntraliz3d, Koolex, bin2chen, VAD37
+XKET, Tricko, jkoppel, MalfurionWhitehat, Koolex, immeas, dec3ntraliz3d, bin2chen, VAD37
 
 ## Summary
 
@@ -516,7 +516,7 @@ Increment `_claimableUnlockedCapital` [for all](https://github.com/sherlock-audi
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/116 
 
 ## Found by 
-ck, libratus, mahdikarimi, clems4ever
+libratus, ck, clems4ever, 0x52, mahdikarimi
 
 ## Summary
 To be able to withdraw, a user has to request a withdraw first. The only requirement to be able to request a withdraw is to have a balance of SToken upon requesting. By requesting withdraws with the same tokens but from different addresses, a malicious user can create the option to withdraw during one cycle more than what is deposited in the protocol. They cannot drain the protocol since they only have a limited amount of SToken to burn (required to call `withdraw()`), but they acquire the ability to deposit new funds and withdraw them in the same block, thus manipulating premium prices.
@@ -554,7 +554,7 @@ Freeze STokens for a depositor once they requested a withdrawal.
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/112 
 
 ## Found by 
-minhtrng, c7e7eff, Allarious, jkoppel, immeas, bin2chen, libratus, ctf\_sec, \_\_141345\_\_, modern\_Alchemist\_00, 0Kage, clems4ever, 0x52, chaduke
+libratus, ctf\_sec, minhtrng, jkoppel, clems4ever, chaduke, \_\_141345\_\_, Allarious, immeas, c7e7eff, 0Kage, 0x52, modern\_Alchemist\_00, bin2chen
 
 ## Summary
 The Carapace protocol checks that a protection buyer does not buy a protection for an 
@@ -605,7 +605,7 @@ Now we are considering fixing this with other audit issues.
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/63 
 
 ## Found by 
-ast3ros, KingNFT, rvierdiiev, MalfurionWhitehat, Tricko, ctf\_sec, 0Kage, yixxas, clems4ever, jkoppel, peanuts, bin2chen, libratus, \_\_141345\_\_, Ruhum, Bauer, SPYBOY, minhtrng, unforgiven, Koolex, modern\_Alchemist\_00, 0x52, chaduke
+ctf\_sec, MalfurionWhitehat, bin2chen, rvierdiiev, libratus, Tricko, chaduke, ast3ros, peanuts, 0x52, yixxas, SPYBOY, jkoppel, clems4ever, Bauer, 0Kage, modern\_Alchemist\_00, KingNFT, minhtrng, Ruhum, \_\_141345\_\_, unforgiven, Koolex
 
 ## Summary
 There are two instances where the ProtectionPool contract loops over an unbounded array. These can cause the transaction to succeed the block gas limit causing the transaction to revert, see https://swcregistry.io/docs/SWC-128.
@@ -943,7 +943,7 @@ I will add this to the fix list
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/31 
 
 ## Found by 
-bin2chen, clems4ever
+clems4ever, bin2chen
 
 ## Summary
 
@@ -1075,7 +1075,7 @@ try catch for _poolTokens.ownerOf() If revert, it is assumed that the lender is 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/26 
 
 ## Found by 
-jkoppel, monrel, immeas, libratus, 0Kage, chaduke
+libratus, monrel, jkoppel, chaduke, immeas, 0Kage
 
 ## Summary
 ``accruePremiumAndExpireProtections()`` will increase ``totalSTokenUnderlying``, and thus increase the exchange rate of the ``ProtectionPool``. A malicious user can launch a sandwich attack and profit. This violates the ``Fair Distribution`` principle of the protocol: 
@@ -1178,7 +1178,7 @@ Manual Review
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/305 
 
 ## Found by 
-unforgiven, XKET, rvierdiiev, \_\_141345\_\_, Web3SecurityDAO
+XKET, rvierdiiev, \_\_141345\_\_, unforgiven, Web3SecurityDAO
 
 ## Summary
 when a lending loan defaults, then function `lockCapital()` get called in the ProtectionPool to lock required funds for the protections bought for that lending pool, but code doesn't filter the expired protections first and they may be expired protection in the active protection array that are not excluded and this would cause code to lock more fund and pay fund for expired defaulted protections and protection sellers would lose more funds.
@@ -1284,7 +1284,7 @@ call `_accruePremiumAndExpireProtections()` for the defaulted pool to filter out
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/252 
 
 ## Found by 
-mahdikarimi, Jeiwan, Allarious, monrel, rvierdiiev, libratus, ctf\_sec, ast3ros, 0Kage, Kumpa
+Jeiwan, libratus, monrel, ctf\_sec, rvierdiiev, ast3ros, Allarious, 0Kage, Kumpa, mahdikarimi
 
 ## Summary
 A buyer can buy a protection for a pool that's already late on a payment. The buyer can pay the minimal premium and get a higher chance of getting a compensation. Protection sellers may bear higher losses due to reduced premium amounts and the increased chance of protection payments.
@@ -1668,7 +1668,7 @@ Contestants' payouts and scores will be updated according to the changes made on
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/147 
 
 ## Found by 
-charlesjhongc, immeas
+immeas, charlesjhongc
 
 ## Summary
 Seeing that a pool is about to lock, an attacker can use a flash loan from a secondary market like uniswap to claim the share of a potential unlock of capital later.
@@ -1795,7 +1795,7 @@ Agreed that was not clearly stated in the original report. And it technically sh
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/117 
 
 ## Found by 
-jprod15, mert\_eren, Web3SecurityDAO, clems4ever, Ruhum, Bauer, chaduke, Kumpa
+clems4ever, chaduke, Ruhum, jprod15, Bauer, Kumpa, mert\_eren, Web3SecurityDAO
 
 ## Summary
 In some cases the protocol can contain zero funds while having a non zero totalSupply of STokens. In that case the protocol will not be able to accept any new deposits and any new protection buys, thus coming to a halt, unless all STokens are burned by their respective holders.
