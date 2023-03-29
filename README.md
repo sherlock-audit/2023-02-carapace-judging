@@ -3,7 +3,7 @@
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/308 
 
 ## Found by 
-monrel, jkoppel, 0x52, libratus
+monrel, 0x52, jkoppel, libratus
 
 ## Summary
 
@@ -89,6 +89,14 @@ This issue's escalations have been accepted!
 
 Contestants' payouts and scores will be updated according to the changes made on this issue.
 
+**vnadoda**
+
+@clems4ev3r @hrishibhat PR for this issue is: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/60
+
+**clems4ev3r**
+
+Fix looks good
+
 
 
 # Issue H-2: User can game protection via renewal to get free insurance 
@@ -96,7 +104,7 @@ Contestants' payouts and scores will be updated according to the changes made on
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/293 
 
 ## Found by 
-libratus, monrel, minhtrng, rvierdiiev, jkoppel, 0Kage, 0x52, KingNFT
+rvierdiiev, KingNFT, libratus, jkoppel, minhtrng, 0Kage, monrel, 0x52
 
 ## Summary
 
@@ -159,6 +167,10 @@ We are planning to fix this issue. @taisukemino
 when you review fix PRs, please do it in sequence, they are created as I am creating a new fix branch on top of the previous fix branch to avoid merge conflicts.
 Cc @hrishibhat 
 
+**clems4ev3r**
+
+Fix looks good
+
 
 
 # Issue H-3: Protection sellers can bypass withdrawal delay mechanism and avoid losing funds when loans are defaulted by creating withdrawal request in each cycle 
@@ -166,7 +178,7 @@ Cc @hrishibhat
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/292 
 
 ## Found by 
-XKET, ctf\_sec, monrel, bin2chen, mahdikarimi, libratus, rvierdiiev, csanuragjain, chaduke, ast3ros, jprod15, peanuts, 0x52, clems4ever, Allarious, carrot, Bauer, HonorLt, 0Kage, mert\_eren, KingNFT, Jeiwan, Ruhum, unforgiven, immeas
+Jeiwan, ctf\_sec, 0Kage, HonorLt, monrel, Allarious, Bauer, rvierdiiev, chaduke, mert\_eren, XKET, ast3ros, mahdikarimi, jprod15, 0x52, libratus, immeas, KingNFT, peanuts, bin2chen, clems4ever, unforgiven, carrot, csanuragjain, Ruhum
 
 ## Summary
 To prevent protection sellers from withdrawing fund immediately when protected lending pools are defaults, there is withdrawal delay mechanism, but it's possible to bypass it by creating withdraw request in each cycle by doing so user can withdraw in each cycle's open state. there is no penalty for users when they do this or there is no check to avoid this.
@@ -226,12 +238,24 @@ Manual Review
 ## Recommendation
 To avoid this code should keep track of user balance that is not in withdraw delay and user balance that are requested for withdraw. and to prevent users from requesting withdrawing and not doing it protocol should have some penalties for withdrawals, for example the waiting withdraw balance shouldn't get reward in waiting duration.
 
+## Discussion
+
+**vnadoda**
+
+@clems4ev3r PR for the fix is: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/63
+
+**clems4ev3r**
+
+Fix looks good
+
+
+
 # Issue H-4: Lending pool state transition will be broken when pool is expired in late state 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/230 
 
 ## Found by 
-Jeiwan, rvierdiiev
+rvierdiiev, Jeiwan
 
 ## Summary
 Lending pool state transition will be broken when pool is expired in late state
@@ -329,6 +353,14 @@ These are tricky cases, think about transition for lending pool in such cases.
 **clems4ev3r**
 
 @vnadoda agreed
+
+**vnadoda**
+
+@clems4ev3r PR for this fix: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/65
+
+**clems4ev3r**
+
+Fix looks good
 
 
 
@@ -460,6 +492,14 @@ This allows buyers to minimize the cost of protections while having an almost gu
 @Jeiwan @clems4ev3r @hrishibhat Once protection is expired, buyers will have a certain time limit within which they have to renew (7-10 days). So buyers can't wait for a long time. Generally payment period for loans is 30 days.
 Essentially buyers have to continuously renew their protections to get the coverage.
 
+**vnadoda**
+
+@clems4ev3r PR for this fix is: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/72
+
+**clems4ev3r**
+
+Fix looks good
+
 
 
 # Issue H-6: Protection seller will lose unlocked capital if it fails to claim during more than one period 
@@ -467,7 +507,7 @@ Essentially buyers have to continuously renew their protections to get the cover
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/142 
 
 ## Found by 
-XKET, Tricko, jkoppel, MalfurionWhitehat, Koolex, immeas, dec3ntraliz3d, bin2chen, VAD37
+dec3ntraliz3d, VAD37, Koolex, bin2chen, MalfurionWhitehat, XKET, Tricko, immeas, jkoppel
 
 ## Summary
 
@@ -509,6 +549,10 @@ Increment `_claimableUnlockedCapital` [for all](https://github.com/sherlock-audi
 
 @clems4ev3r PR for the fix is: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/62
 
+**clems4ev3r**
+
+Fix looks good
+
 
 
 # Issue H-7: Sybil on withdrawal requests can allow leverage factor manipulation with flashloans 
@@ -516,7 +560,7 @@ Increment `_claimableUnlockedCapital` [for all](https://github.com/sherlock-audi
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/116 
 
 ## Found by 
-libratus, ck, clems4ever, 0x52, mahdikarimi
+libratus, ck, clems4ever, mahdikarimi, 0x52
 
 ## Summary
 To be able to withdraw, a user has to request a withdraw first. The only requirement to be able to request a withdraw is to have a balance of SToken upon requesting. By requesting withdraws with the same tokens but from different addresses, a malicious user can create the option to withdraw during one cycle more than what is deposited in the protocol. They cannot drain the protocol since they only have a limited amount of SToken to burn (required to call `withdraw()`), but they acquire the ability to deposit new funds and withdraw them in the same block, thus manipulating premium prices.
@@ -549,12 +593,24 @@ Manual Review
 ## Recommendation
 Freeze STokens for a depositor once they requested a withdrawal.
 
+## Discussion
+
+**vnadoda**
+
+@clems4ev3r PR for the fix is: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/63
+
+**clems4ev3r**
+
+Fix looks good
+
+
+
 # Issue H-8: Protection buyer may buy multiple protections for same goldfinch NFT 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/112 
 
 ## Found by 
-libratus, ctf\_sec, minhtrng, jkoppel, clems4ever, chaduke, \_\_141345\_\_, Allarious, immeas, c7e7eff, 0Kage, 0x52, modern\_Alchemist\_00, bin2chen
+libratus, jkoppel, ctf\_sec, bin2chen, minhtrng, modern\_Alchemist\_00, clems4ever, immeas, 0Kage, c7e7eff, chaduke, Allarious, 0x52, \_\_141345\_\_
 
 ## Summary
 The Carapace protocol checks that a protection buyer does not buy a protection for an 
@@ -598,6 +654,10 @@ Now we are considering fixing this with other audit issues.
 
 @clems4ev3r PR for this fix: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/59
 
+**clems4ev3r**
+
+Fix looks good
+
 
 
 # Issue H-9: Too many active protections can cause the ProtectionPool reach the block gas limit 
@@ -605,7 +665,7 @@ Now we are considering fixing this with other audit issues.
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/63 
 
 ## Found by 
-ctf\_sec, MalfurionWhitehat, bin2chen, rvierdiiev, libratus, Tricko, chaduke, ast3ros, peanuts, 0x52, yixxas, SPYBOY, jkoppel, clems4ever, Bauer, 0Kage, modern\_Alchemist\_00, KingNFT, minhtrng, Ruhum, \_\_141345\_\_, unforgiven, Koolex
+ctf\_sec, Koolex, Tricko, 0Kage, Bauer, rvierdiiev, chaduke, ast3ros, 0x52, libratus, minhtrng, MalfurionWhitehat, modern\_Alchemist\_00, yixxas, jkoppel, \_\_141345\_\_, SPYBOY, KingNFT, peanuts, bin2chen, clems4ever, unforgiven, Ruhum
 
 ## Summary
 There are two instances where the ProtectionPool contract loops over an unbounded array. These can cause the transaction to succeed the block gas limit causing the transaction to revert, see https://swcregistry.io/docs/SWC-128.
@@ -760,6 +820,15 @@ The function `lockCapital` deals with one lending pool at a time, so practically
 
 @hrishibhat we are planning to address this
 
+**vnadoda**
+
+@hrishibhat @clems4ev3r Min protection amount change is NOT needed because a buyer can only buy one protection per lending position.
+Let me know if you have any questions/concerns.
+
+**jacksanford1**
+
+No code change planned, labeling as Acknowledged by protocol team
+
 
 
 # Issue H-10: Missing validation of snapshotId makes it possible for the investor to claim unlocked capitals from the same snapshot multiple times 
@@ -767,7 +836,7 @@ The function `lockCapital` deals with one lending pool at a time, so practically
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/60 
 
 ## Found by 
-bin2chen, Koolex
+Koolex, bin2chen
 
 ## Summary
 Missing validation of snapshotId makes it possible for the investor/seller to claim unlocked capitals from the same snapshot multiple times
@@ -936,6 +1005,10 @@ I will add this to the fix list
 
 @clems4ev3r PR for this fix is: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/55
 
+**clems4ev3r**
+
+Fix looks good
+
 
 
 # Issue H-11: Malicious seller forced break lockCapital() 
@@ -943,7 +1016,7 @@ I will add this to the fix list
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/31 
 
 ## Found by 
-clems4ever, bin2chen
+bin2chen, clems4ever
 
 ## Summary
 
@@ -1070,12 +1143,24 @@ Manual Review
 
 try catch for _poolTokens.ownerOf() If revert, it is assumed that the lender is not the owner
 
+## Discussion
+
+**vnadoda**
+
+@clems4ev3r Fix for this issue: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/64
+
+**clems4ev3r**
+
+Fix looks good
+
+
+
 # Issue H-12: Sandwich attack to accruePremiumAndExpireProtections() 
 
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/26 
 
 ## Found by 
-libratus, monrel, jkoppel, chaduke, immeas, 0Kage
+libratus, jkoppel, immeas, 0Kage, chaduke, monrel
 
 ## Summary
 ``accruePremiumAndExpireProtections()`` will increase ``totalSTokenUnderlying``, and thus increase the exchange rate of the ``ProtectionPool``. A malicious user can launch a sandwich attack and profit. This violates the ``Fair Distribution`` principle of the protocol: 
@@ -1171,6 +1256,14 @@ Manual Review
 
 @hrishibhat please close this.
 
+**vnadoda**
+
+@clems4ev3r PR for this fix: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/57
+
+**clems4ev3r**
+
+Fix looks good
+
 
 
 # Issue M-1: function lockCapital() doesn't filter the expired protections first and code may lock more funds than required and expired defaulted protections may funded 
@@ -1178,7 +1271,7 @@ Manual Review
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/305 
 
 ## Found by 
-XKET, rvierdiiev, \_\_141345\_\_, unforgiven, Web3SecurityDAO
+rvierdiiev, Web3SecurityDAO, unforgiven, XKET, \_\_141345\_\_
 
 ## Summary
 when a lending loan defaults, then function `lockCapital()` get called in the ProtectionPool to lock required funds for the protections bought for that lending pool, but code doesn't filter the expired protections first and they may be expired protection in the active protection array that are not excluded and this would cause code to lock more fund and pay fund for expired defaulted protections and protection sellers would lose more funds.
@@ -1277,6 +1370,14 @@ call `_accruePremiumAndExpireProtections()` for the defaulted pool to filter out
 
 @clems4ev3r we plan to fix this issue
 
+**vnadoda**
+
+@clems4ev3r PR for this issue: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/68
+
+**clems4ev3r**
+
+Fix looks good
+
 
 
 # Issue M-2: Protection can be bought in late pools, allowing buyers to pay minimal premium and increase the chance of a compensation 
@@ -1284,7 +1385,7 @@ call `_accruePremiumAndExpireProtections()` for the defaulted pool to filter out
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/252 
 
 ## Found by 
-Jeiwan, libratus, monrel, ctf\_sec, rvierdiiev, ast3ros, Allarious, 0Kage, Kumpa, mahdikarimi
+rvierdiiev, libratus, Jeiwan, ctf\_sec, Kumpa, ast3ros, mahdikarimi, 0Kage, monrel, Allarious
 
 ## Summary
 A buyer can buy a protection for a pool that's already late on a payment. The buyer can pay the minimal premium and get a higher chance of getting a compensation. Protection sellers may bear higher losses due to reduced premium amounts and the increased chance of protection payments.
@@ -1314,6 +1415,18 @@ Protection buyers can increase their chances of getting a compensation, while bu
 Manual Review
 ## Recommendation
 In `ProtectionPoolHelper._verifyLendingPoolIsActive`, consider calling `DefaultStateManager._assessState` to update the status of the pool for which a protection is bought.
+
+## Discussion
+
+**vnadoda**
+
+@clems4ev3r PR for this issue: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/67
+
+**clems4ev3r**
+
+Fix #67 and #71 looks good
+
+
 
 # Issue M-3: If unlocked capital in pool falls below minRequiredCapital, then protection can be bought for minimum premium 
 
@@ -1431,6 +1544,14 @@ This issue's escalations have been accepted!
 
 Contestants' payouts and scores will be updated according to the changes made on this issue.
 
+**vnadoda**
+
+@clems4ev3r Fix for this issue: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/76
+
+**clems4ev3r**
+
+Fix looks good
+
 
 
 # Issue M-4: Protection too expensive when some capital is locked 
@@ -1479,6 +1600,14 @@ Do not count protections which are locking up capital when computing the leverag
 **clems4ev3r**
 
 @vnadoda agreed this is valid. Active protections which have contributed to locking capital should not be accounted for in leverage ratio
+
+**vnadoda**
+
+@clems4ev3r PR for this issue: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/70
+
+**clems4ev3r**
+
+Fix looks good
 
 
 
@@ -1661,6 +1790,14 @@ This issue's escalations have been accepted!
 
 Contestants' payouts and scores will be updated according to the changes made on this issue.
 
+**vnadoda**
+
+@clems4ev3r fix for this issue: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/74
+
+**clems4ev3r**
+
+Fix looks good
+
 
 
 # Issue M-6: secondary markets are problematic with how `lockCapital` works 
@@ -1668,7 +1805,7 @@ Contestants' payouts and scores will be updated according to the changes made on
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/147 
 
 ## Found by 
-immeas, charlesjhongc
+charlesjhongc, immeas
 
 ## Summary
 Seeing that a pool is about to lock, an attacker can use a flash loan from a secondary market like uniswap to claim the share of a potential unlock of capital later.
@@ -1722,6 +1859,18 @@ Manual Review
 
 ## Recommendation
 I recommend you make `assessState` only callable by a trusted user. This would remove the attack vector, since you must hold the tokens over a transaction. It would still be possible to use the [withdraw bug](https://github.com/sherlock-audit/2023-02-carapace-0ximmeas/issues/4), but if that is fixed this would remove the possibility to "flash-lock".
+
+## Discussion
+
+**vnadoda**
+
+@clems4ev3r PR to fix this issue: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/69
+
+**clems4ev3r**
+
+Fix looks good
+
+
 
 # Issue M-7: Growing of totalSupply after successive lock/unlockCapital can freeze protection pools by uint overflow 
 
@@ -1788,6 +1937,15 @@ Agreed that was not clearly stated in the original report. And it technically sh
 
 @hrishibhat we are planning to fix this
 
+**vnadoda**
+
+@clems4ev3r @hrishibhat there is no code change for this issue.
+Please see my comment: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/117#issuecomment-1485956386
+
+**jacksanford1**
+
+No code change planned, labeling as Acknowledged by protocol team
+
 
 
 # Issue M-8: Freezing of the protocol when totalSTokenUnderlying is zero but totalSupply is non-zero 
@@ -1795,7 +1953,7 @@ Agreed that was not clearly stated in the original report. And it technically sh
 Source: https://github.com/sherlock-audit/2023-02-carapace-judging/issues/117 
 
 ## Found by 
-clems4ever, chaduke, Ruhum, jprod15, Bauer, Kumpa, mert\_eren, Web3SecurityDAO
+chaduke, mert\_eren, Kumpa, Web3SecurityDAO, clems4ever, jprod15, Ruhum, Bauer
 
 ## Summary
 In some cases the protocol can contain zero funds while having a non zero totalSupply of STokens. In that case the protocol will not be able to accept any new deposits and any new protection buys, thus coming to a halt, unless all STokens are burned by their respective holders.
@@ -1830,6 +1988,26 @@ Keep a minimum amount of totalSTokenUnderlying in the contract in any case (can 
 **vnadoda**
 
 @clems4ev3r we plan to fix this
+
+**vnadoda**
+
+@clems4ev3r As we have discussed, keeping the dust amount won't help with the situation when totalSTokenUnderlying is zero or tends to zero.
+
+**We have decided that for v1,  we have to make a protection pool non-operational and deploy a new protection pool, if this situation arises.**
+
+A non-operational protection pool means nobody can buy/renew protections or deposit into the pool. 
+
+I have verified that when totalSTokenUnderlying is zero or tends to zero, because of the leverage ratio check nobody will be able to buy/renew protections plus the deposit fails because of the exchange rate being 0.
+
+**This means, there is no code change required for this issue.**
+
+@hrishibhat @clems4ev3r Let me know if you have any questions/concerns.
+
+We will implement a "liquidation" process in the upcoming version to wind down the dead pool. 
+
+**jacksanford1**
+
+No code change planned, labeling as Acknowledged by protocol team
 
 
 
@@ -1987,6 +2165,14 @@ We revise ``verifyAndAccruePremium()`` so that it will process and return the ri
 **vnadoda**
 
 @clems4ev3r @hrishibhat This will be fixed with daily premium accrual change for #294 
+
+**vnadoda**
+
+@clems4ev3r Fix for this issue is in PR: https://github.com/carapace-finance/credit-default-swaps-contracts/pull/57
+
+**clems4ev3r**
+
+Fix looks good
 
 
 
